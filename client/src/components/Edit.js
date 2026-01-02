@@ -1,0 +1,271 @@
+import React, { useContext, useEffect, useState } from 'react';
+import { NavLink, useParams, useHistory } from 'react-router-dom';
+import { updatedata } from './context/ContextProvider';
+
+const Edit = () => {
+    const {updata, setUPdata} = useContext(updatedata)
+
+    const history = useHistory("");
+
+    const [inpval, setINP] = useState({
+        name: "",
+        email: "",
+        age: "",
+        gender:"",
+        mobile: "",
+        state: "",
+        district: "",
+        add: "",
+        date:"",
+    });
+    const [errors, setErrors] = useState({});
+
+    const setdata = (e) => {
+        console.log(e.target.value);
+        const { name, value } = e.target;
+        setINP((preval) => {
+            return {
+                ...preval,
+                [name]: value
+            }
+        })
+    }
+
+
+    const { id } = useParams("");
+    console.log(id);
+
+
+
+    const getdata = async () => {
+
+        const res = await fetch(`/induser/${id}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        const data = await res.json();
+        console.log(data);
+
+        if (res.status === 422 || !data) {
+            console.log("error ");
+
+        } else {
+            setINP(data[0])
+            console.log("get data");
+
+        }
+    }
+
+    useEffect(() => {
+        getdata();
+    }, []);
+
+
+    const updateuser = async(e)=>{
+        e.preventDefault();
+
+        const {name,email, age,gender,mobile,state,  district,add,date} = inpval;
+        const newErrors = {};
+
+        if (!name.trim()) {
+            newErrors.name = 'Name is required';
+        }
+        if (!email.includes("@")) {
+            newErrors.email = 'Enter should be valid it required @';
+        }
+        if (!mobile.trim() || isNaN(mobile) || mobile.length !== 10) {
+            newErrors.mobile = 'Mobile should be 10-digit integer';
+        }
+        if (!age || isNaN(age) || age <= 0 || age >= 100) {
+            newErrors.age = 'Age should be 0 to 100';
+        }
+        if (state === "") {
+            newErrors.state = 'State is required';
+        }
+        if (district === "") {
+            newErrors.district = 'District is required';
+        }
+        if (gender === "") {
+            newErrors.gender = 'Gender is required';
+        }
+      
+        if(add===""){
+            newErrors.add = 'Address is required';
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+        } 
+        else {
+        const res2 = await fetch(`/updateuser/${id}`,{
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body:JSON.stringify({
+                name,email, age,gender,mobile,state,  district,add,date
+            })
+        });
+    
+
+        const data2 = await res2.json();
+        console.log(data2);
+
+        if(res2.status === 422 || !data2){
+            alert("fill the data");
+        }else{
+            history.push("/home")
+            setUPdata(data2);
+        }
+
+    }
+    }
+    const states = [
+        { name: "Assam", districts: ["Baksa", "Barpeta", "Biswanath", "Bongaigaon", "Cachar", "Charaideo", "Chirang", "Darrang", "Dhemaji", "Dhubri", "Dibrugarh", "Dima Hasao", "Goalpara", "Golaghat", "Hailakandi", "Hojai", "Jorhat", "Kamrup", "Kamrup Metropolitan", "Karbi Anglong", "Karimganj", "Kokrajhar", "Lakhimpur", "Majuli", "Morigaon", "Nagaon", "Nalbari", "Sivasagar", "Sonitpur", "South Salmara-Mankachar", "Tinsukia", "Udalguri", "West Karbi Anglong"] },
+        { name: "Bihar", districts: ["Araria", "Arwal", "Aurangabad", "Banka", "Begusarai", "Bhagalpur", "Bhojpur", "Buxar", "Darbhanga", "East Champaran", "Gaya", "Gopalganj", "Jamui", "Jehanabad", "Kaimur", "Katihar", "Khagaria", "Kishanganj", "Lakhisarai", "Madhepura", "Madhubani", "Munger", "Muzaffarpur", "Nalanda", "Nawada", "Patna", "Purnia", "Rohtas", "Saharsa", "Samastipur", "Saran", "Sheikhpura", "Sheohar", "Sitamarhi", "Siwan", "Supaul", "Vaishali", "West Champaran"] },
+        { name: "Chhattisgarh", districts: ["Balod", "Baloda Bazar", "Balrampur", "Bastar", "Bemetara", "Bijapur", "Bilaspur", "Dantewada", "Dhamtari", "Durg", "Gariaband", "Janjgir-Champa", "Jashpur", "Kanker", "Kawardha", "Kondagaon", "Korba", "Koriya", "Mahasamund", "Mungeli", "Narayanpur", "Raigarh", "Raipur", "Rajnandgaon", "Sukma", "Surajpur", "Surguja"] },
+        { name: "Goa", districts: ["North Goa", "South Goa"] },
+        { name: "Gujarat", districts: ["Ahmedabad", "Amreli", "Anand", "Aravalli", "Banaskantha", "Bharuch", "Bhavnagar", "Botad", "Chhota Udaipur", "Dahod", "Dang", "Devbhoomi Dwarka", "Gandhinagar", "Gir Somnath", "Jamnagar", "Junagadh", "Kheda", "Kutch", "Mahisagar", "Mehsana", "Morbi", "Narmada", "Navsari", "Panchmahal", "Patan", "Porbandar", "Rajkot", "Sabarkantha", "Surat", "Surendranagar", "Tapi", "Vadodara", "Valsad"] },
+        { name: "Haryana", districts: ["Ambala", "Bhiwani", "Charkhi Dadri", "Faridabad", "Fatehabad", "Gurugram", "Hisar", "Jhajjar", "Jind", "Kaithal", "Karnal", "Kurukshetra", "Mahendragarh", "Nuh", "Palwal", "Panchkula", "Panipat", "Rewari", "Rohtak", "Sirsa", "Sonipat", "Yamunanagar"] },
+        { name: "Himachal Pradesh", districts: ["Bilaspur", "Chamba", "Hamirpur", "Kangra", "Kinnaur", "Kullu", "Lahaul and Spiti", "Mandi", "Shimla", "Sirmaur", "Solan", "Una"] },
+        { name: "Jharkhand", districts: ["Bokaro", "Chatra", "Deoghar", "Dhanbad", "Dumka", "East Singhbhum", "Garhwa", "Giridih", "Godda", "Gumla", "Hazaribagh", "Jamtara", "Khunti", "Koderma", "Latehar", "Lohardaga", "Pakur", "Palamu", "Ramgarh", "Ranchi", "Sahebganj", "Seraikela Kharsawan", "Simdega", "West Singhbhum"] },
+        { name: "Karnataka", districts: ["Bagalkot", "Ballari", "Belagavi", "Bengaluru Rural", "Bengaluru Urban", "Bidar", "Chamarajanagar", "Chikkaballapur", "Chikkamagaluru", "Chitradurga", "Dakshina Kannada", "Davanagere", "Dharwad", "Gadag", "Hassan", "Haveri", "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya", "Mysuru", "Raichur", "Ramanagara", "Shivamogga", "Tumakuru", "Udupi", "Uttara Kannada", "Vijayanagara", "Vijayapura", "Yadgir"] },
+        { name: "Kerala", districts: ["Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod", "Kollam", "Kottayam", "Kozhikode", "Malappuram", "Palakkad", "Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad"] },
+        { name: "Madhya Pradesh", districts: ["Agar Malwa", "Alirajpur", "Anuppur", "Ashoknagar", "Balaghat", "Barwani", "Betul", "Bhind", "Bhopal", "Burhanpur", "Chhatarpur", "Chhindwara", "Damoh", "Datia", "Dewas", "Dhar", "Dindori", "Guna", "Gwalior", "Harda", "Hoshangabad", "Indore", "Jabalpur", "Jhabua", "Katni", "Khandwa", "Khargone", "Mandla", "Mandsaur", "Morena", "Narsinghpur", "Neemuch", "Panna", "Raisen", "Rajgarh", "Ratlam", "Rewa", "Sagar", "Satna", "Sehore", "Seoni", "Shahdol", "Shajapur", "Sheopur", "Shivpuri", "Sidhi", "Singrauli", "Tikamgarh", "Ujjain", "Umaria", "Vidisha"] },
+        { name: "Maharashtra", districts: ["Ahmednagar", "Akola", "Amravati", "Aurangabad", "Beed", "Bhandara", "Buldhana", "Chandrapur", "Dhule", "Gadchiroli", "Gondia", "Hingoli", "Jalgaon", "Jalna", "Kolhapur", "Latur", "Mumbai City", "Mumbai Suburban", "Nagpur", "Nanded", "Nandurbar", "Nashik", "Osmanabad", "Palghar", "Parbhani", "Pune", "Raigad", "Ratnagiri", "Sangli", "Satara", "Sindhudurg", "Solapur", "Thane", "Wardha", "Washim", "Yavatmal"] },
+        { name: "Manipur", districts: ["Bishnupur", "Chandel", "Churachandpur", "Imphal East", "Imphal West", "Jiribam", "Kakching", "Kamjong", "Kangpokpi", "Noney", "Pherzawl", "Senapati", "Tamenglong", "Tengnoupal", "Thoubal", "Ukhrul"] },
+        { name: "Meghalaya", districts: ["East Garo Hills", "East Jaintia Hills", "East Khasi Hills", "North Garo Hills", "Ri Bhoi", "South Garo Hills", "South West Garo Hills", "South West Khasi Hills", "West Garo Hills", "West Jaintia Hills", "West Khasi Hills"] },
+        { name: "Mizoram", districts: ["Aizawl", "Champhai", "Hnahthial", "Khawzawl", "Kolasib", "Lawngtlai", "Lunglei", "Mamit", "Saiha", "Saitual", "Serchhip"] },
+        { name: "Nagaland", districts: ["Dimapur", "Kiphire", "Kohima", "Longleng", "Mokokchung", "Mon", "Peren", "Phek", "Tuensang", "Wokha", "Zunheboto"] },
+        { name: "Odisha", districts: ["Angul", "Balangir", "Balasore", "Bargarh", "Bhadrak", "Boudh", "Cuttack", "Deogarh", "Dhenkanal", "Gajapati", "Ganjam", "Jagatsinghpur", "Jajpur", "Jharsuguda", "Kalahandi", "Kandhamal", "Kendrapara", "Kendujhar", "Khordha", "Koraput", "Malkangiri", "Mayurbhanj", "Nabarangpur", "Nayagarh", "Nuapada", "Puri", "Rayagada", "Sambalpur", "Subarnapur", "Sundargarh"] },
+        { name: "Punjab", districts: ["Amritsar", "Barnala", "Bathinda", "Faridkot", "Fatehgarh Sahib", "Fazilka", "Ferozepur", "Gurdaspur", "Hoshiarpur", "Jalandhar", "Kapurthala", "Ludhiana", "Mansa", "Moga", "Muktsar", "Pathankot", "Patiala", "Rupnagar", "Sahibzada Ajit Singh Nagar (Mohali)", "Sangrur", "Shahid Bhagat Singh Nagar (Nawanshahr)", "Sri Muktsar Sahib", "Tarn Taran"] },
+        { name: "Rajasthan", districts: ["Ajmer", "Alwar", "Banswara", "Baran", "Barmer", "Bharatpur", "Bhilwara", "Bikaner", "Bundi", "Chittorgarh", "Churu", "Dausa", "Dholpur", "Dungarpur", "Hanumangarh", "Jaipur", "Jaisalmer", "Jalore", "Jhalawar", "Jhunjhunu", "Jodhpur", "Karauli", "Kota", "Nagaur", "Pali", "Pratapgarh", "Rajsamand", "Sawai Madhopur", "Sikar", "Sirohi", "Sri Ganganagar", "Tonk", "Udaipur"] },
+        { name: "Sikkim", districts: ["East Sikkim", "North Sikkim", "South Sikkim", "West Sikkim"] },
+        { name: "Tamil Nadu", districts: ["Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri", "Dindigul", "Erode", "Kallakurichi", "Kancheepuram", "Kanyakumari", "Karur", "Krishnagiri", "Madurai", "Mayiladuthurai", "Nagapattinam", "Namakkal", "Nilgiris", "Perambalur", "Pudukkottai", "Ramanathapuram", "Ranipet", "Salem", "Sivaganga", "Tenkasi", "Thanjavur", "Theni", "Thoothukudi", "Tiruchirappalli", "Tirunelveli", "Tirupathur", "Tiruppur", "Tiruvallur", "Tiruvannamalai", "Tiruvarur", "Vellore", "Viluppuram", "Virudhunagar"] },
+        { name: "Telangana", districts: ["Adilabad", "Bhadradri Kothagudem", "Hyderabad", "Jagtial", "Jangaon", "Jayashankar Bhupalpally", "Jogulamba Gadwal", "Kamareddy", "Karimnagar", "Khammam", "Komaram Bheem Asifabad", "Mahabubabad", "Mahabubnagar", "Mancherial", "Medak", "Medchal–Malkajgiri", "Nagarkurnool", "Nalgonda", "Nirmal", "Nizamabad", "Peddapalli", "Rajanna Sircilla", "Ranga Reddy", "Sangareddy", "Siddipet", "Suryapet", "Vikarabad", "Wanaparthy", "Warangal Rural", "Warangal Urban", "Yadadri Bhuvanagiri"] },
+        { name: "Tripura", districts: ["Dhalai", "Gomati", "Khowai", "North Tripura", "Sepahijala", "South Tripura", "Unakoti", "West Tripura"] },
+        { name: "Uttar Pradesh", districts: ["Agra", "Aligarh", "Allahabad", "Ambedkar Nagar", "Amethi", "Amroha", "Auraiya", "Azamgarh", "Baghpat", "Bahraich", "Ballia", "Balrampur", "Banda", "Barabanki", "Bareilly", "Basti", "Bhadohi", "Bijnor", "Budaun", "Bulandshahr", "Chandauli", "Chitrakoot", "Deoria", "Etah", "Etawah", "Faizabad", "Farrukhabad", "Fatehpur", "Firozabad", "Gautam Buddh Nagar", "Ghaziabad", "Ghazipur", "Gonda", "Gorakhpur", "Hamirpur", "Hapur", "Hardoi", "Hathras", "Jalaun", "Jaunpur", "Jhansi", "Kannauj", "Kanpur Dehat", "Kanpur Nagar", "Kasganj", "Kaushambi", "Kheri", "Kushinagar", "Lalitpur", "Lucknow", "Maharajganj", "Mahoba", "Mainpuri", "Mathura", "Mau", "Meerut", "Mirzapur", "Moradabad", "Muzaffarnagar", "Pilibhit", "Pratapgarh", "Raebareli", "Rampur", "Saharanpur", "Sambhal", "Sant Kabir Nagar", "Shahjahanpur", "Shamli", "Shravasti", "Siddharthnagar", "Sitapur", "Sonbhadra", "Sultanpur", "Unnao", "Varanasi"] },
+        { name: "Uttarakhand", districts: ["Almora", "Bageshwar", "Chamoli", "Champawat", "Dehradun", "Haridwar", "Nainital", "Pauri Garhwal", "Pithoragarh", "Rudraprayag", "Tehri Garhwal", "Udham Singh Nagar", "Uttarkashi"] },
+        { name: "West Bengal", districts: ["Alipurduar", "Bankura", "Birbhum", "Cooch Behar", "Dakshin Dinajpur", "Darjeeling", "Hooghly", "Howrah", "Jalpaiguri", "Jhargram", "Kalimpong", "Kolkata", "Malda", "Murshidabad", "Nadia", "North 24 Parganas", "Paschim Bardhaman", "Paschim Medinipur", "Purba Bardhaman", "Purba Medinipur", "Purulia", "South 24 Parganas", "Uttar Dinajpur"] },
+    ];
+    
+    
+    
+
+    
+
+   
+    return (
+        <div className="container">
+            <NavLink to="/home">Home</NavLink>
+            <form className="mt-4">
+            <div className="row">
+                <div className="mb-3 col-lg-6 col-md-6 col-12">
+                        <label htmlFor="name" className="form-label">Name</label>
+                        <input type="text"
+                         value={inpval.name} 
+                         onChange={setdata} 
+                         name="name" 
+                         className="form-control" 
+                         id="name"
+                         title="Name should be string"
+                        
+                        />
+                        {errors.name && <div className="text-danger">{errors.name}</div>}
+                    </div>
+                    <div className="mb-3 col-lg-6 col-md-6 col-12">
+                        <label htmlFor="date" className="form-label">date</label>
+                        <input 
+                        type="date" 
+                        value={inpval.date} 
+                        onChange={setdata} 
+                        name="date" 
+                        className="form-control" 
+                        id="date"
+                        title="Date should be in formate"
+                        />
+                        {errors.date && <div className="text-danger">{errors.date}</div>}
+
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="mb-3 col-lg-6 col-md-6 col-12">
+                        <label htmlFor="email" className="form-label">Email</label>
+                        <input 
+                        type="email" 
+                        value={inpval.email} 
+                        onChange={setdata} 
+                        name="email" 
+                        className="form-control"
+                         id="email" 
+                         title="Email should contain '@' and end with '.com'"
+                         />
+                        {errors.email && <div className="text-danger">{errors.email}</div>}
+                    </div>
+                    <div className="mb-3 col-lg-6 col-md-6 col-12">
+                        <label htmlFor="age" className="form-label">Age</label>
+                        <input 
+                        type="text" 
+                        value={inpval.age} 
+                        onChange={setdata} 
+                        name="age" 
+                        className="form-control"
+                         id="age"
+                         title="Age should be Integer and 0 to 100"
+                          />
+
+                        {errors.age && <div className="text-danger">{errors.age}</div>}
+                    </div>
+                    <div className="mb-3 col-lg-6 col-md-6 col-12">
+                        <label htmlFor="mobile" className="form-label">Mobile</label>
+                        <input type="text" value={inpval.mobile} onChange={setdata} name="mobile" className="form-control" id="mobile"  title="Mobile number should be 10 digit " />
+                        {errors.mobile && <div className="text-danger">{errors.mobile}</div>}
+                    </div>
+                    <div className="mb-3 col-lg-6 col-md-6 col-12">
+                        <label htmlFor="state" className="form-label">State</label>
+                        <select value={inpval.state} onChange={setdata} name="state" className="form-select">
+                            <option value="">Select State</option>
+                            {states.map((state, index) => (
+                                <option key={index} value={state.name}>{state.name}</option>
+                            ))}
+                        </select>
+                        {errors.state && <div className="text-danger">{errors.state}</div>}
+                    </div>
+                    <div className="mb-3 col-lg-6 col-md-6 col-12">
+                        <label htmlFor="district" className="form-label">District</label>
+                        <select value={inpval.district} onChange={setdata} name="district" className="form-select">
+                            <option value="">Select District</option>
+                            {inpval.state && (
+                                states.find(s => s.name === inpval.state)?.districts.map((district, index) => (
+                                    <option key={index} value={district}>{district}</option>
+                                ))
+                            )}
+                        </select>
+                        {errors.district && <div className="text-danger">{errors.district}</div>}
+                    </div>
+                    <div className="mb-3 col-lg-6 col-md-6 col-12">
+                        <label htmlFor="add" className="form-label">Address</label>
+                        <input type="text" value={inpval.add} onChange={setdata} name="add" className="form-control" id="add"  title="You can write anything "/>
+                        {errors.add && <div className="text-danger">{errors.add}</div>}
+
+                    </div>
+                    <div className="mb-3 col-lg-6 col-md-6 col-12">
+                        <label htmlFor="gender" className="form-label">Gender</label>
+                        <select value={inpval.gender} onChange={setdata} name="gender" className="form-select">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                        {errors.gender && <div className="text-danger">{errors.gender}</div>}
+                    </div>
+                </div>
+                <button type="submit" onClick={updateuser} className="btn btn-primary">Update</button>
+            </form>
+        </div>
+    );
+};
+
+export default Edit;
