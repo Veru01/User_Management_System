@@ -4,8 +4,8 @@ const mysql=require("mysql2");
 const conn=mysql.createConnection({
     user:"root",
     host:"localhost",
-    password:"Ashish2002@",
-    database:"crud_app"
+    password:"Sarika@123",
+    database:"user_manager"
 });
 
 

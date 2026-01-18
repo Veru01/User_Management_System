@@ -37,7 +37,7 @@ router.post("/create", (req, res) => {
 
 
 router.get("/getusers",(req,res)=>{
-    conn.query("SELECT * FROM crud_app.users",(err,result)=>{
+    conn.query("SELECT * FROM user_manager.users",(err,result)=>{
         if(err){
             res.status(500).json({ error: "Internal server error" });
         }
@@ -55,7 +55,7 @@ router.delete("/deleteuser/:id",(req,res)=>{
 
     const {id}=req.params;
 
-    conn.query("DELETE FROM crud_app.users WHERE id=?",id,(err,result)=>{
+    conn.query("DELETE FROM user_manager.users WHERE id=?",id,(err,result)=>{
         if(err){
             res.status(500).json({ error: "Internal server error" });
         }
@@ -73,7 +73,7 @@ router.delete("/deleteuser/:id",(req,res)=>{
 router.get("/induser/:id", (req, res) => {
     const { id } = req.params;
 
-    conn.query("SELECT * FROM crud_app.users WHERE id=?", id, (err, result) => {
+    conn.query("SELECT * FROM user_manager.users WHERE id=?", id, (err, result) => {
         if (err) {
             res.status(500).json({ error: "Internal server error" });
         } else {
@@ -91,7 +91,7 @@ router.get("/lmuser", (req, res) => {
     const { page = 1, limit = 10 } = req.query;
     const offset = (page - 1) * limit;
 
-    conn.query("SELECT * FROM crud_app.users LIMIT ? OFFSET ?", [parseInt(limit), offset], (err, result) => {
+    conn.query("SELECT * FROM user_manager.users LIMIT ? OFFSET ?", [parseInt(limit), offset], (err, result) => {
         if (err) {
             res.status(500).json({ error: "Internal server error" });
         } else {
@@ -114,7 +114,7 @@ router.get("/searchusers/:query", (req, res) => {
 
     // Use parameterized query to prevent SQL injection
     conn.query(
-        "SELECT * FROM crud_app.users WHERE name LIKE ?",
+        "SELECT * FROM user_manager.users WHERE name LIKE ?",
         [searchQuery],
         (err, result) => {
             if (err) {
@@ -139,7 +139,7 @@ router.patch("/updateuser/:id",(req,res)=>{
 
     const data = req.body;
 
-    conn.query("UPDATE crud_app.users SET ? WHERE id = ? ",[data,id],(err,result)=>{
+    conn.query("UPDATE user_manager.users SET ? WHERE id = ? ",[data,id],(err,result)=>{
         if(err){
             res.status(422).json({message:"error"});
         }else{
@@ -208,9 +208,9 @@ router.post('/loginpg', (req, res) => {
 
 
 // export to csv file 
-//SELECT * FROM crud_app.users
+//SELECT * FROM user_manager.users
 router.get('/export-csv', (req, res) => {
-    const query = 'SELECT id, name, `date`, email, age, gender, mobile, state, district, `add` FROM crud_app.users';
+    const query = 'SELECT id, name, `date`, email, age, gender, mobile, state, district, `add` FROM user_manager.users';
     conn.query(query, (err, results) => {
       if (err) {
         console.error('Error fetching data from SQL: ', err);
