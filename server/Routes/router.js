@@ -1,17 +1,22 @@
+
 const express = require("express");
+
+const mysql = require("mysql2");
 
 const router = express.Router();
 const conn = require("../db/conn");
 
 
 router.post("/create", (req, res) => {
+    console.log("REQ BODY 👉", req.body);
+
     const { name, email, age, gender,mobile, state, district, add,date } = req.body;
 
     if (!name || !email || !age || !gender || !mobile || !state || !district || !add || !date) {
         return res.status(422).json({ error: "Please fill all the data" });
     }
 
-    conn.query("SELECT * FROM users WHERE email = ?", email, (err, result) => {
+    conn.query("SELECT * FROM user_manager.users WHERE email = ?", [email], (err, result) => {
         if (err) {
             console.error("Error executing query:", err);
             return res.status(500).json({ error: "Internal server error" });
@@ -190,7 +195,7 @@ router.post("/signupadd", (req, res) => {
 // login page
 
 router.post('/loginpg', (req, res) => {
-    const sql = "SELECT * FROM crud_app.signup WHERE email` = ? AND `password` = ?";
+    const sql = "SELECT * FROM crud_app.signup WHERE email = ? AND `password` = ?";
     
      console.log(req.body);
     conn.query(sql, [req.body.email, req.body.password], (err, data) => {

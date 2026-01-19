@@ -13,6 +13,8 @@ const port = 8001;
 
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 app.use(cors());
 
